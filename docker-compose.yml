@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: proptech_postgis
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: proptech_db
+      POSTGRES_USER: proptech_user
+      POSTGRES_PASSWORD: proptech_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U proptech_user -d proptech_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: proptech_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://proptech_user:proptech_password@db:5432/proptech_db
+      SECRET_KEY: proptech-production-secret-key-change-in-prod
+      WEBHOOK_HMAC_SECRET: proptech-webhook-secret-key-2026
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+
+volumes:
+  postgis_data:
