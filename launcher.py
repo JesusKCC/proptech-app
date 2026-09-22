@@ -14,7 +14,7 @@ import webbrowser
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 BACKEND_DIR = os.path.join(ROOT_DIR, "backend")
-FRONTEND_DIR = os.path.join(ROOT_DIR, "frontend")
+FRONTEND_DIR = ROOT_DIR if os.path.exists(os.path.join(ROOT_DIR, "next.config.mjs")) else os.path.join(ROOT_DIR, "frontend")
 
 
 def print_banner():
